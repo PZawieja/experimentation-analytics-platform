@@ -1,0 +1,21 @@
+name: "experimentation_analytics_platform"
+version: "1.0.0"
+config-version: 2
+
+profile: "experimentation_analytics_platform"
+
+model-paths: ["dbt/models"]
+test-paths: ["dbt/tests"]
+macro-paths: ["dbt/macros"]
+analysis-paths: ["dbt/analyses"]
+seed-paths: ["dbt/seeds"]
+
+vars:
+  exp_exposure_event_name: "experiment_exposed"
+  exp_exposure_max_days_after_assignment: 7
+  exp_allow_pre_assignment_exposure_grace_minutes: 5
+  exp_pre_assignment_grace_minutes: 5
+
+models:
+  experimentation_analytics_platform:
+    +materialized: view

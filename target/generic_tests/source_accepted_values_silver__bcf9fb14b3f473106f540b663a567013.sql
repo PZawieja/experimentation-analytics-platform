@@ -1,0 +1,1 @@
+{{ test_accepted_values(column_name="assigned_variant_id", model=get_where_subquery(source('silver', 'int_experiment_exposure_validation')), values=["control","treatment"]) }}

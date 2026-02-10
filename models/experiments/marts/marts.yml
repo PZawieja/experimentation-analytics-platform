@@ -1,0 +1,53 @@
+version: 2
+
+models:
+  - name: fct_experiment_exposure_quality_daily
+    description: "Daily exposure validation metrics per experiment."
+    tests:
+      - dbt_utils.unique_combination_of_columns:
+          arguments:
+            combination_of_columns:
+              - experiment_id
+              - date_day
+    columns:
+      - name: experiment_id
+        tests:
+          - not_null
+      - name: date_day
+        tests:
+          - not_null
+
+  - name: mart_experiment_exposure_audit
+    description: "BI-ready audit lens for exposure quality per experiment/day."
+    tests:
+      - dbt_utils.unique_combination_of_columns:
+          arguments:
+            combination_of_columns:
+              - experiment_id
+              - date_day
+    columns:
+      - name: experiment_id
+        tests:
+          - not_null
+      - name: date_day
+        tests:
+          - not_null
+      - name: exposure_health
+        tests:
+          - not_null
+
+  - name: fct_experiment_cohort
+    description: "Canonical experiment cohort contract at experiment_id x unit_id grain."
+    tests:
+      - dbt_utils.unique_combination_of_columns:
+          arguments:
+            combination_of_columns:
+              - experiment_id
+              - unit_id
+    columns:
+      - name: experiment_id
+        tests:
+          - not_null
+      - name: unit_id
+        tests:
+          - not_null

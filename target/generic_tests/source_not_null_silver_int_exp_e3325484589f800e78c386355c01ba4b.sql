@@ -1,0 +1,1 @@
+{{ test_not_null(column_name="assigned_variant_id", model=get_where_subquery(source('silver', 'int_experiment_exposure_validation'))) }}

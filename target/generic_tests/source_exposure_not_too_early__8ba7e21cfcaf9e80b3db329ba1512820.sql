@@ -1,0 +1,1 @@
+{{ test_exposure_not_too_early(model=get_where_subquery(source('silver', 'int_experiment_exposure_validation'))) }}

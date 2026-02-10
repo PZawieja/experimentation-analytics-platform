@@ -1,0 +1,20 @@
+version: 2
+
+models:
+  - name: stg_experiment_exposures
+    description: "Standardized exposure events for experimentation exposure tracking."
+    columns:
+      - name: event_id
+        tests:
+          - not_null
+          # event_id uniqueness is only valid if your source event_id is globally unique.
+          # - unique
+      - name: occurred_at
+        tests:
+          - not_null
+      - name: unit_id
+        tests:
+          - not_null
+      - name: experiment_id
+        tests:
+          - not_null

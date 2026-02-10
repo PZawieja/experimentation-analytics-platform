@@ -1,0 +1,14 @@
+experimentation_analytics_platform:
+  target: dev
+  outputs:
+    dev:
+      type: snowflake
+      account: "{{ env_var('SNOWFLAKE_ACCOUNT', 'dummy_account') }}"
+      user: "{{ env_var('SNOWFLAKE_USER', 'dummy_user') }}"
+      password: "{{ env_var('SNOWFLAKE_PASSWORD', 'dummy_password') }}"
+      role: "{{ env_var('SNOWFLAKE_ROLE', 'dummy_role') }}"
+      database: "{{ env_var('SNOWFLAKE_DATABASE', 'dummy_db') }}"
+      warehouse: "{{ env_var('SNOWFLAKE_WAREHOUSE', 'dummy_wh') }}"
+      schema: "{{ env_var('SNOWFLAKE_SCHEMA', 'analytics') }}"
+      threads: 4
+      client_session_keep_alive: false

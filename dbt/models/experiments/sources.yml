@@ -1,0 +1,68 @@
+version: 2
+
+sources:
+  - name: silver
+    description: "Silver-layer tables produced by Spark jobs."
+    tables:
+      - name: int_experiment_exposure_validation
+        description: "Assignment-to-exposure validation table at experiment_id x user_id grain."
+        tests:
+          - dbt_utils.unique_combination_of_columns:
+              arguments:
+                combination_of_columns:
+                  - experiment_id
+                  - user_id
+          - exposure_not_too_early:
+              arguments:
+                assigned_ts: assigned_at
+                exposure_ts: first_exposure_at
+                grace_minutes: {{ var('exp_allow_pre_assignment_exposure_grace_minutes', 5) }}
+        columns:
+          - name: experiment_id
+            tests:
+              - not_null
+          - name: user_id
+            tests:
+              - not_null
+          - name: assigned_at
+            tests:
+              - not_null
+          - name: assigned_variant_id
+            tests:
+              - not_null
+              - accepted_values:
+                  arguments:
+                    values: ["control", "treatment"]
+          - name: validation_status
+            tests:
+              - accepted_values:
+                  arguments:
+                    values:
+                      - "valid"
+                      - "no_exposure"
+                      - "multi_variation_exposure"
+                      - "pre_assignment_exposure"
+                      - "exposure_outside_window"
+                      - "variant_mismatch"
+                      - "invalid_other"
+      - name: int_experiment_exposures_deduped
+        description: "Deduped exposure events (earliest per experiment/user/variant)."
+        tests:
+          - dbt_utils.unique_combination_of_columns:
+              arguments:
+                combination_of_columns:
+                  - experiment_id
+                  - user_id
+                  - variant_id
+
+  - name: gold
+    description: "Gold-layer tables produced by Spark jobs."
+    tables:
+      - name: fct_experiment_quality_metrics_daily
+        description: "Daily exposure validation metrics per experiment."
+        tests:
+          - dbt_utils.unique_combination_of_columns:
+              arguments:
+                combination_of_columns:
+                  - experiment_id
+                  - date_day
