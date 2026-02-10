@@ -1,0 +1,17 @@
+# local data
+data/
+
+# python
+.venv/
+__pycache__/
+*.pyc
+
+# notebooks
+.ipynb_checkpoints/
+
+# OS
+.DS_Store
+
+# logs / metrics
+*.log
+benchmarks/
