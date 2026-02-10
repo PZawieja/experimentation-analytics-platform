@@ -15,6 +15,10 @@ vars:
   exp_exposure_max_days_after_assignment: 7
   exp_allow_pre_assignment_exposure_grace_minutes: 5
   exp_pre_assignment_grace_minutes: 5
+  exp_control_variation_id: "control"
+  exp_primary_metric_id: "conversion_7d"
+  exp_conversion_event_name: "purchase"
+  exp_conversion_window_days: 7
 
 models:
   experimentation_analytics_platform:

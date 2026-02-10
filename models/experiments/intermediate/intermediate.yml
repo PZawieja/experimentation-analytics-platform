@@ -66,3 +66,29 @@ models:
                   - "exposure_outside_window"
                   - "variant_mismatch"
                   - "invalid_other"
+
+  - name: int_experiment_metric_outcomes__conversion
+    description: "Binary conversion outcomes per experiment/unit within the post-exposure window."
+    tests:
+      - dbt_utils.unique_combination_of_columns:
+          arguments:
+            combination_of_columns:
+              - experiment_id
+              - unit_id
+              - metric_id
+    columns:
+      - name: experiment_id
+        tests:
+          - not_null
+      - name: unit_id
+        tests:
+          - not_null
+      - name: variation_id
+        tests:
+          - not_null
+      - name: metric_id
+        tests:
+          - not_null
+      - name: exposure_at
+        tests:
+          - not_null

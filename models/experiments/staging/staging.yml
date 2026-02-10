@@ -18,3 +18,18 @@ models:
       - name: experiment_id
         tests:
           - not_null
+
+  - name: stg_conversion_events
+    description: "Standardized conversion events filtered to the primary conversion event."
+    columns:
+      - name: event_id
+        tests:
+          - not_null
+          # event_id uniqueness is only valid if your source event_id is globally unique.
+          # - unique
+      - name: occurred_at
+        tests:
+          - not_null
+      - name: unit_id
+        tests:
+          - not_null

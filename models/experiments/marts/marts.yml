@@ -51,3 +51,49 @@ models:
       - name: unit_id
         tests:
           - not_null
+
+  - name: agg_experiment_metric_by_variant
+    description: "Aggregated conversion metrics per experiment/metric/variation."
+    tests:
+      - dbt_utils.unique_combination_of_columns:
+          arguments:
+            combination_of_columns:
+              - experiment_id
+              - metric_id
+              - variation_id
+    columns:
+      - name: experiment_id
+        tests:
+          - not_null
+      - name: metric_id
+        tests:
+          - not_null
+      - name: variation_id
+        tests:
+          - not_null
+      - name: n_users
+        tests:
+          - not_null
+
+  - name: fct_experiment_results
+    description: "Experiment results with uplift and statistical significance per variation."
+    tests:
+      - dbt_utils.unique_combination_of_columns:
+          arguments:
+            combination_of_columns:
+              - experiment_id
+              - metric_id
+              - variation_id
+    columns:
+      - name: experiment_id
+        tests:
+          - not_null
+      - name: metric_id
+        tests:
+          - not_null
+      - name: variation_id
+        tests:
+          - not_null
+      - name: conversion_rate
+        tests:
+          - not_null
