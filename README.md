@@ -125,6 +125,33 @@ tables using seeded synthetic data.
 This allows the full experimentation logic to run locally without Spark
 or a cloud warehouse.
 
+### Seeded Demo Scenario
+
+The local DuckDB mode includes a minimal synthetic experiment:
+
+- Experiment: `exp_demo_001`
+- 3 assigned users
+- 2 valid exposures
+- 1 missing exposure
+- Daily quality metrics computed from validation
+
+#### Example: `int_experiment_exposure_validation`
+
+| experiment_id | user_id | assigned_variant_id | first_exposure_at | validation_status |
+| --- | --- | --- | --- | --- |
+| exp_demo_001 | u1 | control | 2026-02-01 10:02 | valid |
+| exp_demo_001 | u2 | treatment | 2026-02-01 10:01 | valid |
+| exp_demo_001 | u3 | control | null | no_exposure |
+
+This produces:
+
+- exposure_rate = 0.6667  
+- valid_exposure_rate = 0.6667  
+- mismatch_rate = 0.0000  
+
+The dataset is intentionally small to make integrity behavior transparent.
+
+
 ### Quick start
 
 ```bash
