@@ -1,7 +1,8 @@
 version: 2
 
 sources:
-  - name: "{{ var('exp_source_schema_silver', '_silver') }}"
+  - name: silver
+    schema: "{{ var('exp_source_schema_silver', '_silver') }}"
     description: "Silver-layer tables produced by Spark jobs."
     tables:
       - name: int_experiment_exposure_validation
@@ -56,7 +57,8 @@ sources:
                   - user_id
                   - variant_id
 
-  - name: "{{ var('exp_source_schema_gold', '_gold') }}"
+  - name: gold
+    schema: "{{ var('exp_source_schema_gold', '_gold') }}"
     description: "Gold-layer tables produced by Spark jobs."
     tables:
       - name: fct_experiment_quality_metrics_daily

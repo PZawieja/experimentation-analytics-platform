@@ -1,0 +1,7 @@
+experimentation_analytics_platform:
+  target: dev
+  outputs:
+    dev:
+      type: duckdb
+      path: duckdb/experimentation.duckdb
+      threads: 4

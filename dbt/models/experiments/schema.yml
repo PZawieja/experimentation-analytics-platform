@@ -1,0 +1,59 @@
+version: 2
+
+models:
+
+  - name: int_experiment_metric_outcomes__conversion
+    description: >
+      User-level binary conversion outcome within the attribution window
+      (default 7 days) after experiment assignment.
+
+    columns:
+      - name: experiment_id
+        description: Experiment identifier.
+        tests:
+          - not_null
+
+      - name: user_id
+        description: Unit identifier at experiment grain.
+        tests:
+          - not_null
+
+      - name: assigned_variant_id
+        description: Variant assigned at experiment start.
+        tests:
+          - not_null
+          - accepted_values:
+              arguments:
+                values: ["control", "treatment"]
+
+      - name: is_converted_7d
+        description: >
+          1 if user triggered conversion event within attribution window
+          after assignment, else 0.
+        tests:
+          - not_null
+          
+  - name: agg_experiment_metric_by_variant
+    description: >
+      Aggregated experiment metrics per variant.
+      Provides counts and conversion rate per variation.
+
+    columns:
+      - name: experiment_id
+        tests: [not_null]
+
+      - name: variation_id
+        tests:
+          - not_null
+          - accepted_values:
+              arguments:
+                values: ["control", "treatment"]
+
+      - name: n_users
+        tests: [not_null]
+
+      - name: n_converted
+        tests: [not_null]
+
+      - name: conversion_rate
+        tests: [not_null]
