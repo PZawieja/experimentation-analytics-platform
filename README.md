@@ -1,8 +1,20 @@
 ## Experimentation Analytics Platform
 
-Spark-based analytics pipeline for experimentation data with an explicit
-assignment -> exposure -> outcomes model. The goal is to make experiments
-auditable, guardrail-ready, and analysis-safe by default.
+Experimentation analytics pipeline with an explicit  
+assignment → exposure → outcomes model.
+
+The goal is to make experiments:
+
+- auditable  
+- guardrail-ready  
+- statistically sound  
+- analysis-safe by default  
+- AI-queryable with governance  
+
+The platform is designed for production (Spark → Silver → Gold)  
+and includes a fully portable DuckDB execution mode for local reproducibility.
+
+---
 
 ## Architecture Overview
 
@@ -18,19 +30,30 @@ flowchart TD
     G --> H
     H --> I[agg_experiment_metric_by_variant]
     I --> J[fct_experiment_results]
+    J --> K[dim_ai_allowed_assets]
+    K --> L[SQL Guardrail]
+    L --> M[Conversational Query Runner]
 ```
+
+---
+
+## Core Models
 
 | Model | Grain | Purpose |
 | --- | --- | --- |
 | `stg_experiment_exposures` | event_id | Standardized exposure events. |
-| `int_experiment_exposure_validation` | experiment_id x unit_id | Exposure integrity flags and timestamps. |
-| `fct_experiment_exposure_quality_daily` | experiment_id x date_day | Daily exposure health metrics. |
-| `fct_experiment_cohort` | experiment_id x unit_id | Canonical cohort with ITT/exposure flags. |
-| `int_experiment_metric_outcomes__conversion` | experiment_id x unit_id | Binary conversion outcome within window. |
-| `agg_experiment_metric_by_variant` | experiment_id x metric_id x variation_id | Aggregated counts and rates per variant. |
-| `fct_experiment_results` | experiment_id x metric_id x variation_id | Uplift, p-value, and confidence interval. |
+| `int_experiment_exposure_validation` | experiment_id × unit_id | Exposure integrity flags and timestamps. |
+| `fct_experiment_exposure_quality_daily` | experiment_id × date_day | Daily exposure health metrics. |
+| `fct_experiment_cohort` | experiment_id × unit_id | Canonical cohort with ITT/exposure flags. |
+| `int_experiment_metric_outcomes__conversion` | experiment_id × unit_id | Binary conversion outcome within window. |
+| `agg_experiment_metric_by_variant` | experiment_id × metric_id × variation_id | Aggregated counts and rates per variant. |
+| `fct_experiment_results` | experiment_id × metric_id × variation_id | Uplift, p-value, and confidence interval. |
+| `dim_ai_allowed_assets` | asset_name | Semantic contract for AI-queryable tables. |
 
-### Example Output
+---
+
+## Example Output (J6)
+
 Sample `fct_experiment_results` row:
 
 | experiment_id | metric_id | variation_id | n_users | conversion_rate | uplift_abs | p_value_two_sided | ci_low | ci_high |
@@ -41,19 +64,31 @@ Sample `fct_experiment_results` row:
 - **p_value_two_sided**: probability of observing this uplift if true uplift is 0.
 - **CI (ci_low/ci_high)**: 95% interval for the absolute uplift estimate.
 
-### Core data products
-- `data/silver/fact_assignment_canonical`: canonical assignments (J1)
-- `data/silver/int_experiment_exposure_validation`: assignment-to-exposure validation (J2)
-- `data/gold/fct_experiment_quality_metrics_daily`: daily exposure quality metrics (J2)
+---
 
-### Key analysis modes
-- **ITT (intent-to-treat)**: analyze all assigned users, regardless of exposure
-- **Exposure-based**: analyze only users with a valid exposure
+## Core Data Products
 
-The platform is designed to support both, and requires analysts to choose
-the appropriate mode explicitly.
+- `silver.fact_assignment_canonical` → canonical assignments (J1)
+- `silver.int_experiment_exposure_validation` → assignment-to-exposure validation (J2)
+- `gold.fct_experiment_quality_metrics_daily` → daily exposure health metrics (J2)
+- `gold.fct_experiment_results` → statistical experiment output (J6)
 
-### Jobs
+---
+
+## Key Analysis Modes
+
+- **ITT (intent-to-treat)**  
+  Analyze all assigned users, regardless of exposure.
+
+- **Exposure-based analysis**  
+  Analyze only users with valid exposure.
+
+The platform supports both and requires explicit analyst selection.
+
+---
+
+## Jobs (Production Mode)
+
 Generate synthetic data:
 `python jobs/00_generate_data.py --dt 2026-02-01`
 
@@ -63,62 +98,95 @@ Build canonical assignments (J1):
 Build exposure validation + quality metrics (J2):
 `python jobs/20_build_exposure_validation.py --dt 2026-02-01`
 
-### dbt quality tests (portfolio)
-A minimal dbt project is included to demonstrate data tests on the
-Spark-produced tables. See `dbt/models/experiments/sources.yml`.
+---
 
-## Demo This Repo
+## dbt Quality Tests
 
-### dbt commands
-Run the full project:
-`dbt deps && dbt run`
+A minimal dbt project demonstrates source contracts and integrity checks.
 
-Run only experiment models:
-`dbt run --select models/experiments/*`
+Run:
 
-### Core tables to open
-- `int_experiment_exposure_validation`
-- `fct_experiment_exposure_quality_daily`
-- `fct_experiment_cohort`
+`dbt deps && dbt build`
 
-### Example A/B Test Output (J6)
-Sample `fct_experiment_results` rows:
+Source contracts include:
 
-| experiment_id | metric_id      | variation_id | n_users | conversion_rate | uplift_abs | p_value_two_sided | ci_low  | ci_high |
-| --- | --- | --- | ---: | ---: | ---: | ---: | ---: | ---: |
-| exp_1 | conversion_7d | control   | 10000 | 0.030 | 0.000 | 1.000 | 0.000 | 0.000 |
-| exp_1 | conversion_7d | treatment | 10020 | 0.034 | 0.004 | 0.041 | 0.000 | 0.008 |
+- uniqueness constraints
+- not_null checks
+- accepted_values validation
+- exposure timing validation
 
-- **uplift_abs**: absolute difference in conversion rate vs control.
-- **p_value_two_sided**: probability of observing this uplift if true uplift is 0.
-- **CI (ci_low/ci_high)**: 95% interval for the absolute uplift estimate.
+---
 
-### Local smoke queries (DuckDB)
-If you don't have a DWH, use DuckDB to query Parquet outputs locally:
-`python3 -m pip install duckdb`
+## Local Portable Mode (DuckDB)
 
-Open a DuckDB shell and create views:
-```
-create view fct_experiment_assignments as
-select * from read_parquet('data/silver/fact_assignment_canonical/dt=2026-02-01/*.parquet');
+The repository includes a DuckDB-based runtime that simulates Silver/Gold
+tables using seeded synthetic data.
 
-create view int_experiment_exposure_validation as
-select * from read_parquet('data/silver/int_experiment_exposure_validation/dt=2026-02-01/*.parquet');
+This allows the full experimentation logic to run locally without Spark
+or a cloud warehouse.
 
-create view fct_experiment_exposure_quality_daily as
-select * from read_parquet('data/gold/fct_experiment_quality_metrics_daily/dt=2026-02-01/*.parquet');
+### Quick start
+
+```bash
+make setup
+make deps
+make seed
+make build
+make demo_ai
 ```
 
-Then run the queries in `docs/j2_smoke_queries.sql` (adjust date syntax if needed).
+---
 
-### Failure modes + detection
-- **Broken exposure logging** → exposure_rate drops in quality daily.
-- **Pre-assignment exposure** → `pre_assignment_exposure` spikes in validation.
-- **Variant mismatch** → `variant_mismatch` spikes in validation.
-- **Multi-variation exposure** → `multi_variation_exposure` spikes.
-- **Late exposure** → `exposure_outside_window` increases.
+## AI Semantic Layer & Guardrails
 
-### Next steps (J4–J8)
+The platform includes a governance-first AI integration layer.
+
+### Semantic Contract
+
+`dim_ai_allowed_assets` defines:
+
+- which assets AI may query
+- their grain
+- primary keys
+- business descriptions
+
+This acts as a controlled semantic layer.
+
+### SQL Guardrail
+
+`scripts/ai_sql_guard.py`:
+
+- extracts referenced tables
+- validates against allowlist
+- blocks non-approved queries
+
+### Conversational Demo
+
+`scripts/ai_query_runner.py` demonstrates:
+
+1. Natural language question
+2. LLM-style query plan (stubbed)
+3. SQL validation
+4. Execution if approved
+
+Unsafe queries are explicitly blocked.
+
+---
+
+## Failure Modes + Detection
+
+- **Broken exposure logging** → exposure_rate drops in daily quality metrics.
+- **Pre-assignment exposure** → spike in `pre_assignment_exposure`.
+- **Variant mismatch** → spike in `variant_mismatch`.
+- **Multi-variation exposure** → spike in `multi_variation_exposure`.
+- **Late exposure** → increase in `exposure_outside_window`.
+
+Quality monitoring is first-class in the architecture.
+
+---
+
+## Next Steps (J4–J8)
+
 - J4: metric spine (eligibility + attribution windows)
 - J5: metric definitions layer (metrics contract)
 - J6: experiment results engine (uplift + stats)
