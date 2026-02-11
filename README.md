@@ -151,6 +151,14 @@ This produces:
 
 The dataset is intentionally small to make integrity behavior transparent.
 
+#### Seed Pipeline Flow
+
+```mermaid
+flowchart LR
+    Assignment[Canonical Assignment] --> ExposureValidation[Exposure Validation]
+    ExposureValidation --> QualityMetrics[Quality Metrics]
+    QualityMetrics --> Guardrails[Guardrails / Monitoring]
+```
 
 ### Quick start
 
