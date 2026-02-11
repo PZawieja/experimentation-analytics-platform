@@ -1,1 +1,0 @@
-{{ dbt_utils.test_unique_combination_of_columns(combination_of_columns=["experiment_id","user_id","variant_id"], model=get_where_subquery(source('silver', 'int_experiment_exposures_deduped'))) }}

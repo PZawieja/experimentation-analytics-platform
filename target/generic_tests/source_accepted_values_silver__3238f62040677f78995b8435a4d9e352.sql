@@ -1,1 +1,0 @@
-{{ test_accepted_values(column_name="validation_status", model=get_where_subquery(source('silver', 'int_experiment_exposure_validation')), values=["valid","no_exposure","multi_variation_exposure","pre_assignment_exposure","exposure_outside_window","variant_mismatch","invalid_other"]) }}

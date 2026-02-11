@@ -1,1 +1,0 @@
-{{ dbt_utils.test_unique_combination_of_columns(combination_of_columns=["experiment_id","date_day"], model=get_where_subquery(source('gold', 'fct_experiment_quality_metrics_daily'))) }}

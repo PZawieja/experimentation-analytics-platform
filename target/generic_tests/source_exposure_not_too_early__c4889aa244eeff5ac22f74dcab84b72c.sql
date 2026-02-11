@@ -1,1 +1,0 @@
-{{ test_exposure_not_too_early(assigned_ts="assigned_at", exposure_ts="first_exposure_at", grace_minutes=null, model=get_where_subquery(source('silver', 'int_experiment_exposure_validation'))) }}
