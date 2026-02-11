@@ -23,3 +23,12 @@ vars:
 models:
   experimentation_analytics_platform:
     +materialized: view
+    
+seeds:
+  experimentation_analytics_platform:
+    silver:
+      +schema: silver
+    gold:
+      +schema: gold
+
+

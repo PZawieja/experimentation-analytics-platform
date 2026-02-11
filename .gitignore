@@ -16,3 +16,21 @@ __pycache__/
 *.log
 benchmarks/
 dbt_internal_packages/
+
+
+# Local python env
+.venv/
+
+# DuckDB database
+duckdb/
+
+# dbt artifacts
+target/
+dbt_packages/
+package-lock.yml
+
+# local profile
+profiles.yml
+
+# user config
+.user.yml

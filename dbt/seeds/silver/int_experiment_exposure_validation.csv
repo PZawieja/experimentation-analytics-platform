@@ -1,0 +1,4 @@
+experiment_id,user_id,assigned_at,assigned_variant_id,first_exposure_at,validation_status
+exp_demo_001,u1,2026-02-01 10:00:00,control,2026-02-01 10:02:00,valid
+exp_demo_001,u2,2026-02-01 10:00:00,treatment,2026-02-01 10:01:00,valid
+exp_demo_001,u3,2026-02-01 10:00:00,control,,no_exposure

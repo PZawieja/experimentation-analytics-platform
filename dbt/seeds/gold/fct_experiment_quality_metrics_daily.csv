@@ -1,0 +1,2 @@
+experiment_id,date_day,exposure_rate,valid_exposure_rate,mismatch_rate,pre_assignment_rate,multi_variation_rate,avg_exposure_delay_seconds
+exp_demo_001,2026-02-01,0.6667,0.6667,0.0000,0.0000,0.0000,90
