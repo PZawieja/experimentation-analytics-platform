@@ -163,6 +163,7 @@ flowchart LR
 ### Quick start
 
 ```bash
+cp profiles.yml.example profiles.yml
 make setup
 make deps
 make seed
