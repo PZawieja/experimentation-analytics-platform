@@ -9,6 +9,7 @@ Small demo runner for AI-style analytics Q&A in DuckDB.
 
 import json
 import duckdb
+from ai_intents import SQL_TEMPLATES
 from ai_sql_guard import get_allowed_assets, validate_sql
 from tabulate import tabulate
 
@@ -106,6 +107,7 @@ def stub_llm_params(question: str) -> dict:
     if "did" in q and "treatment" in q and "win" in q:
         return {
             "question": question,
+            "intent": "did_treatment_win",
             "asset_name": "ai_fct_experiment_results",
             "params": {
                 "experiment_id": "exp_demo_001",
@@ -116,6 +118,7 @@ def stub_llm_params(question: str) -> dict:
 
     return {
         "question": question,
+        "intent": "",
         "asset_name": "",
         "params": {},
         "notes": "No params matched."
@@ -132,7 +135,11 @@ def run(question: str):
 
     params_plan = stub_llm_params(question)
     if params_plan["asset_name"] == "ai_fct_experiment_results":
-        sql = SQL_DID_TREATMENT_WIN.format(**params_plan["params"])
+        intent = params_plan["intent"]
+        if intent not in SQL_TEMPLATES:
+            print("❌ Unknown intent:", intent)
+            return
+        sql = SQL_TEMPLATES[intent].format(**params_plan["params"])
 
         print("\n--- QUESTION ---")
         print(params_plan["question"])
