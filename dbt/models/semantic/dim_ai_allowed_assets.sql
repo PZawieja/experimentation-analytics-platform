@@ -25,4 +25,13 @@ select
     , 'experiment_id, date_day'
     , true
     , 'Daily quality metrics for exposure validation. Use for monitoring (exposure_rate, mismatch_rate, etc.).'
+union all
+select
+    'model'
+    , 'ai_fct_experiment_results'
+    , 'experiment_id'
+    , 'experiment_id'
+    , true
+    , 'AI-safe view of experiment outcome stats at experiment grain (control vs treatment conversion rate, uplift, z-score, p-value, CI). Use to answer whether treatment won.'
+
 
