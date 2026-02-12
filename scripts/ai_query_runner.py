@@ -142,6 +142,12 @@ def run(question: str):
         print(sql.strip())
 
         ok, referenced, violations = validate_sql(sql, allowed)
+        expected_asset = params_plan["asset_name"].lower()
+        if referenced != [expected_asset]:
+            print("❌ BLOCKED. SQL must reference only the declared asset.")
+            print("expected:", expected_asset)
+            print("got:", referenced)
+            return
 
         print("\n--- VALIDATION ---")
         print("referenced:", referenced)

@@ -13,17 +13,54 @@ def get_allowed_assets(con) -> set[str]:
 
 def extract_referenced_assets(sql: str) -> set[str]:
     """
-    Very small, pragmatic parser:
-    - captures schema.table occurrences after FROM/JOIN
-    - we keep it simple for now (portfolio demo)
+    Pragmatic parser:
+    - captures table/view identifiers after FROM/JOIN
+    - supports both: schema.table and bare_table
+    - ignores subquery parentheses and commas in FROM lists
     """
-    pattern = r"(?:from|join)\s+([a-zA-Z0-9_]+\.[a-zA-Z0-9_]+)"
-    return {m.group(1).lower() for m in re.finditer(pattern, sql, flags=re.IGNORECASE)}
+    # captures: from <ident> or join <ident>, where ident can be a.b or a
+    pattern = r"(?:from|join)\s+([a-zA-Z0-9_]+(?:\.[a-zA-Z0-9_]+)?)"
+    assets = set()
+
+    for m in re.finditer(pattern, sql, flags=re.IGNORECASE):
+        ident = m.group(1).strip().lower()
+        # strip trailing punctuation if any
+        ident = re.sub(r"[;,)]$", "", ident)
+        assets.add(ident)
+
+    return assets
 
 def validate_sql(sql: str, allowed_assets: set[str]) -> tuple[bool, list[str], list[str]]:
+    s = sql.strip().lower()
+
+    violations = []
+
+    # 1) allow SELECT only
+    if not s.startswith("select") and not s.startswith("with"):
+        violations.append("only_select_allowed")
+
+    # 2) block wildcard
+    if re.search(r"select\s+\*", s):
+        violations.append("select_star_blocked")
+
+    # 3) block dangerous keywords (small, high-signal list)
+    blocked = [
+        "attach", "detach", "copy", "export", "import", "pragma",
+        "install", "load", "call", "create", "drop", "alter", "update",
+        "delete", "insert", "merge"
+    ]
+    for kw in blocked:
+        if re.search(rf"\b{kw}\b", s):
+            violations.append(f"blocked_keyword:{kw}")
+
+    # 4) allowlisted assets only
     referenced = sorted(extract_referenced_assets(sql))
-    violations = [a for a in referenced if a not in allowed_assets]
-    return (len(violations) == 0, referenced, violations)
+    not_allowed = [a for a in referenced if a not in allowed_assets]
+    if not_allowed:
+        violations.extend([f"non_allowlisted_asset:{a}" for a in not_allowed])
+
+    ok = len(violations) == 0
+    return (ok, referenced, violations)
 
 def run_query(sql: str):
     con = duckdb.connect(DB_PATH)
